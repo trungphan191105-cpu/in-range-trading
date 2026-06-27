@@ -3,12 +3,12 @@ import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import { getDb } from '../db/schema';
 import { signToken, verifyToken, AuthRequest } from '../middleware/auth';
+import { validateRequest, loginSchema, registerSchema } from '../middleware/validate';
 
 const router = Router();
 
-router.post('/login', (req, res) => {
+router.post('/login', validateRequest(loginSchema), (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password) { res.status(400).json({ error: 'Email and password required' }); return; }
 
   const db = getDb();
   const user = db.prepare('SELECT * FROM users WHERE email = ? AND is_deleted = 0').get(email) as any;
@@ -32,9 +32,8 @@ router.post('/login', (req, res) => {
   res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, avatar_url: user.avatar_url, delete_requested_at: user.delete_requested_at } });
 });
 
-router.post('/register', (req, res) => {
+router.post('/register', validateRequest(registerSchema), (req, res) => {
   const { name, email, password } = req.body;
-  if (!name || !email || !password) { res.status(400).json({ error: 'All fields required' }); return; }
 
   const db = getDb();
   const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);

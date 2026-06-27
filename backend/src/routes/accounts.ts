@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { getDb } from '../db/schema';
 import { verifyToken, AuthRequest } from '../middleware/auth';
+import { validateRequest, createAccountSchema, updateAccountSchema } from '../middleware/validate';
 
 const router = Router();
 router.use(verifyToken);
@@ -50,9 +51,8 @@ router.get('/:id', (req: AuthRequest, res) => {
 });
 
 // POST /api/accounts — create account
-router.post('/', (req: AuthRequest, res) => {
+router.post('/', validateRequest(createAccountSchema), (req: AuthRequest, res) => {
   const { name, prop_firm, phase, currency, initial_balance, max_daily_loss_pct, max_total_drawdown_pct, profit_target_pct, color, logo_url } = req.body;
-  if (!name || !initial_balance) { res.status(400).json({ error: 'name and initial_balance required' }); return; }
   const db = getDb();
   const id = uuidv4();
   const studentId = req.body.student_id && req.user!.role === 'admin' ? req.body.student_id : req.user!.id;
@@ -64,7 +64,7 @@ router.post('/', (req: AuthRequest, res) => {
 });
 
 // PUT /api/accounts/:id — update
-router.put('/:id', (req: AuthRequest, res) => {
+router.put('/:id', validateRequest(updateAccountSchema), (req: AuthRequest, res) => {
   const db = getDb();
   const acc = db.prepare('SELECT * FROM accounts WHERE id = ?').get(req.params.id) as any;
   if (!acc) { res.status(404).json({ error: 'Not found' }); return; }

@@ -101,7 +101,7 @@ export default function Reports({ studentId }: { studentId?: string }) {
                 <CartesianGrid strokeDasharray="3 3" stroke="#2a2f3e" />
                 <XAxis dataKey="date" tick={{ fill: '#64748b', fontSize: 10 }} tickLine={false} axisLine={false} />
                 <YAxis tick={{ fill: '#64748b', fontSize: 10 }} tickLine={false} axisLine={false} tickFormatter={v => `$${v}`} />
-                <Tooltip contentStyle={{ background: '#1e2230', border: '1px solid #2a2f3e', borderRadius: 8, fontSize: 12 }} formatter={(v: number) => [`$${v.toFixed(2)}`, 'PnL']} />
+                <Tooltip contentStyle={{ background: '#1e2230', border: '1px solid #2a2f3e', borderRadius: 8, fontSize: 12 }} formatter={(v: any) => [`$${v.toFixed(2)}`, 'PnL']} />
                 <Bar dataKey="pnl" radius={[3, 3, 0, 0]}>
                   {histData.map((entry: any, i: number) => (
                     <Cell key={i} fill={entry.pnl >= 0 ? '#22c55e' : '#ef4444'} />

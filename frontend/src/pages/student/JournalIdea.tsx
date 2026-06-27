@@ -317,7 +317,7 @@ export default function JournalIdea() {
   const save = async (e: React.FormEvent) => {
     e.preventDefault(); setSaving(true);
     try {
-      const data = { ...form, type: 'idea', entry_price: form.entry_price||null, exit_price: form.exit_price||null, sl: form.sl||null, tp: form.tp||null, lot_size: form.lot_size||null, pnl: form.pnl||null, rr_ratio: form.rr_ratio||null, discipline_score: form.discipline_score||null, account_id: form.account_id||null, screenshot_url: form.screenshots[0]||form.screenshot_url||null };
+      const data = { ...form, type: 'idea', entry_price: form.entry_price||null, exit_price: form.exit_price||null, sl: form.sl||null, tp: form.tp||null, lot_size: form.lot_size||null, pnl: form.pnl||null, rr_ratio: form.rr_ratio||null, discipline_score: form.discipline_score||null, screenshot_url: form.screenshots[0]||form.screenshot_url||null };
       if (modal?.id) { await api.updateJournal(modal.id, data); toast.success('Đã cập nhật'); }
       else { await api.createJournal(data); toast.success('Đã thêm trade'); }
       qc.invalidateQueries({ queryKey: ['journals'] }); setModal(null);

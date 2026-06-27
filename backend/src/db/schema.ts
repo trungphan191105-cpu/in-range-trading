@@ -111,13 +111,42 @@ function initSchema() {
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
+
+    CREATE TABLE IF NOT EXISTS migrations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT UNIQUE NOT NULL,
+      applied_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
   `);
 
-  // Migrations — add new columns without breaking existing data
-  const safeAlter = (sql: string) => { try { db.exec(sql); } catch { /* column already exists */ } };
-  safeAlter(`ALTER TABLE accounts ADD COLUMN account_type TEXT DEFAULT 'prop'`);
-  safeAlter(`ALTER TABLE accounts ADD COLUMN challenge_type TEXT DEFAULT '2phase'`);
-  safeAlter(`ALTER TABLE accounts ADD COLUMN start_date TEXT`);
-  safeAlter(`ALTER TABLE accounts ADD COLUMN payout_amount REAL DEFAULT 0`);
-  safeAlter(`ALTER TABLE accounts ADD COLUMN payout_count INTEGER DEFAULT 0`);
+  // Lịch sử các mốc migration chính thức
+  const migrations = [
+    {
+      name: '001_add_account_types_and_payouts',
+      sqls: [
+        `ALTER TABLE accounts ADD COLUMN account_type TEXT DEFAULT 'prop'`,
+        `ALTER TABLE accounts ADD COLUMN challenge_type TEXT DEFAULT '2phase'`,
+        `ALTER TABLE accounts ADD COLUMN start_date TEXT`,
+        `ALTER TABLE accounts ADD COLUMN payout_amount REAL DEFAULT 0`,
+        `ALTER TABLE accounts ADD COLUMN payout_count INTEGER DEFAULT 0`,
+      ],
+    },
+    {
+      name: '002_add_trade_journals_account_id',
+      sqls: [
+        `ALTER TABLE trade_journals ADD COLUMN account_id TEXT REFERENCES accounts(id)`,
+      ],
+    },
+  ];
+
+  for (const m of migrations) {
+    const exists = db.prepare(`SELECT id FROM migrations WHERE name = ?`).get(m.name);
+    if (!exists) {
+      for (const sql of m.sqls) {
+        try { db.exec(sql); } catch { /* column might already exist from legacy safeAlter */ }
+      }
+      db.prepare(`INSERT INTO migrations (name) VALUES (?)`).run(m.name);
+      console.log(`📦 Applied migration: ${m.name}`);
+    }
+  }
 }
