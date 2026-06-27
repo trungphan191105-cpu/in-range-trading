@@ -1,0 +1,198 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=DM+Serif+Display:ital@0;1&family=Inter+Tight:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Inter:wght@200;300;400;500;600;700&family=Open+Sauce+One:wght@400;500;600;700;800&family=Nunito+Sans:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  :root {
+    /* ── Fey / Obsidian core ── */
+    --bg:          #0b0b0b;
+    --surface:     rgba(19,19,19,0.72);
+    --surface2:    rgba(26,26,26,0.85);
+    --surface3:    rgba(32,32,32,0.9);
+    --surface-solid: #131313;
+    --card:        rgba(19,19,19,0.65);
+
+    /* Borders — razor glass */
+    --border:        rgba(255,255,255,0.08);
+    --border-light:  rgba(255,255,255,0.12);
+    --border-glow:   rgba(71,159,250,0.2);
+
+    /* Text — Fey hierarchy */
+    --text:        #e6e6e6;
+    --text-soft:   #cccccc;
+    --text-muted:  #868f97;
+    --text-dim:    #555a60;
+
+    /* Accent — sci-fi cyan/blue */
+    --accent:       #479ffa;
+    --accent-deep:  #2d87e8;
+    --accent-glow:  rgba(71,159,250,0.15);
+    --accent-glow2: rgba(71,159,250,0.06);
+
+    /* Ghost controls */
+    --btn:      #479ffa;
+    --btn-h:    #5aabfc;
+    --ghost:    rgba(255,255,255,0.05);
+    --ghost-h:  rgba(255,255,255,0.09);
+
+    /* P&L — Tape Green / Coral Red */
+    --green:     #4ebe96;
+    --green-dim: rgba(78,190,150,0.12);
+    --red:       #c8746a;
+    --red-dim:   rgba(200,116,106,0.12);
+    --yellow:    #d4a044;
+    --blue:      #479ffa;
+
+    /* Glass utility */
+    --glass:        rgba(19,19,19,0.72);
+    --glass-border: rgba(255,255,255,0.07);
+
+    /* Radii */
+    --r-pill:   99px;
+    --r-btn:    8px;
+    --r-card:   14px;
+    --r-input:  8px;
+    --r-badge:  6px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 14px; }
+
+  body {
+    background: var(--bg);
+    /* Atmospheric layered background: dot grid + glow orbs */
+    background-image:
+      radial-gradient(ellipse 60% 50% at 15% 8%, rgba(71,159,250,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 40% at 88% 80%, rgba(128,82,255,0.05) 0%, transparent 60%),
+      radial-gradient(circle, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 28px 28px;
+    color: var(--text);
+    font-family: 'Montserrat', 'Inter Tight', 'Inter', system-ui, sans-serif;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0.005em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+  }
+
+  /* Avenir-style font for stats/accounts */
+  .font-avenir {
+    font-family: 'Montserrat', 'Nunito Sans', 'Avenir Next', 'Avenir', system-ui, sans-serif;
+  }
+  .font-avenir * {
+    font-family: inherit;
+  }
+
+  /* Glassmorphism card utility */
+  .glass-card {
+    background: var(--card);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: var(--r-card);
+  }
+
+  /* Fey micro-interaction base */
+  .fey-btn {
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .fey-btn:hover { opacity: 0.85; }
+
+  #root { min-height: 100vh; }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 99px; }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to   { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.96) translateY(8px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  @keyframes spinSlow {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  @keyframes prismSpin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  .prism-ring {
+    animation: prismSpin 2.8s linear infinite;
+  }
+  .nav-tooltip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10,10,14,0.95);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #ededf3;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    letter-spacing: 0.01em;
+  }
+  .nav-item:hover .nav-tooltip { opacity: 1; }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50%       { opacity: 1; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50%       { transform: translateY(-10px); }
+  }
+  @keyframes floatSlow {
+    0%, 100% { transform: translateY(0px) rotate(-1deg); }
+    50%       { transform: translateY(-6px) rotate(1deg); }
+  }
+  @keyframes orbPulse {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50%       { opacity: 0.8; transform: scale(1.08); }
+  }
+  @keyframes orbDrift {
+    0%   { transform: translate(0, 0); }
+    33%  { transform: translate(30px, -20px); }
+    66%  { transform: translate(-20px, 15px); }
+    100% { transform: translate(0, 0); }
+  }
+  @keyframes shimmer {
+    from { background-position: -400px 0; }
+    to   { background-position: 400px 0; }
+  }
+  @keyframes glow-pulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(71,159,250,0.15); }
+    50%       { box-shadow: 0 0 40px rgba(71,159,250,0.3), 0 0 80px rgba(71,159,250,0.1); }
+  }
+  .float-card { animation: float 5s ease-in-out infinite; }
+  .float-card-2 { animation: float 6.5s ease-in-out infinite 1.2s; }
+  .float-card-3 { animation: floatSlow 7s ease-in-out infinite 0.5s; }
+
+  main > * {
+    animation: fadeUp 0.3s ease both;
+  }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-light), transparent);
+  }
+}
