@@ -198,7 +198,7 @@ export default function SpendPayout() {
                   <input type="date" value={form.date} onChange={f('date')} required style={inputStyle} />
                 </Field>
                 <Field label="Type">
-                  <select value={form.type} onChange={e => { const t = e.target.value; setForm(p => ({ ...p, type: t, category: t === 'spend' ? 'challenge_fee' : 'prop_payout' })); }} style={selectStyle}>
+                  <select value={form.type} onChange={e => { f('type')(e); setForm(p => ({ ...p, type: e.target.value, category: e.target.value === 'spend' ? 'challenge_fee' : 'prop_payout' })); }} style={selectStyle}>
                     <option value="spend">Expense / Spend</option>
                     <option value="payout">Payout / Income</option>
                   </select>

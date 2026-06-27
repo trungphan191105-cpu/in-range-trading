@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { getDb } from '../db/schema';
 import { verifyToken, requireAdmin, AuthRequest } from '../middleware/auth';
+import { validateRequest, createPlanSchema, updatePlanSchema } from '../middleware/validate';
+import { sendNotification } from './notifications';
 
 const router = Router();
 router.use(verifyToken);
@@ -43,9 +45,8 @@ router.get('/:id', (req: AuthRequest, res) => {
   res.json(parseScreenshots(plan));
 });
 
-router.post('/', (req: AuthRequest, res) => {
+router.post('/', validateRequest(createPlanSchema), (req: AuthRequest, res) => {
   const { date, title, market_bias, content, screenshot_url, screenshots } = req.body;
-  if (!date || !title) { res.status(400).json({ error: 'date and title required' }); return; }
   const db = getDb();
   const id = uuidv4();
   const screenshotsJson = JSON.stringify(Array.isArray(screenshots) ? screenshots : []);
@@ -54,7 +55,7 @@ router.post('/', (req: AuthRequest, res) => {
   res.status(201).json(parseScreenshots(db.prepare('SELECT * FROM trade_plans WHERE id = ?').get(id)));
 });
 
-router.put('/:id', (req: AuthRequest, res) => {
+router.put('/:id', validateRequest(updatePlanSchema), (req: AuthRequest, res) => {
   const db = getDb();
   const plan = db.prepare('SELECT * FROM trade_plans WHERE id = ?').get(req.params.id) as any;
   if (!plan) { res.status(404).json({ error: 'Not found' }); return; }
@@ -63,6 +64,7 @@ router.put('/:id', (req: AuthRequest, res) => {
     const { grade, grade_comment, status } = req.body;
     db.prepare(`UPDATE trade_plans SET grade = ?, grade_comment = ?, status = COALESCE(?, status), updated_at = datetime('now') WHERE id = ?`)
       .run(grade ?? plan.grade, grade_comment ?? plan.grade_comment, status || null, req.params.id);
+    sendNotification(plan.student_id, 'plan_graded', { planId: plan.id, title: plan.title, grade: grade ?? plan.grade, grade_comment: grade_comment ?? plan.grade_comment });
   } else {
     if (plan.student_id !== req.user!.id) { res.status(403).json({ error: 'Forbidden' }); return; }
     const { date, title, market_bias, content, status, screenshot_url, screenshots } = req.body;

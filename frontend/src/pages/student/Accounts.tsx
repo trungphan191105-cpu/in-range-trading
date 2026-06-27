@@ -38,7 +38,7 @@ export default function Accounts({ studentId }: { studentId?: string }) {
   const [form, setForm] = useState(DEFAULT_FORM);
   const [saving, setSaving] = useState(false);
 
-  const params = studentId ? { studentId } : {};
+  const params: Record<string, string> = studentId ? { studentId } : {};
   const { data: accounts = [] } = useQuery({ queryKey: ['accounts', studentId], queryFn: () => api.getAccounts(params) });
 
   const f = (k: string) => (e: React.ChangeEvent<any>) => setForm(p => ({ ...p, [k]: e.target.value }));

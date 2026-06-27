@@ -6,19 +6,6 @@ import { verifyToken } from '../middleware/auth';
 const router = Router();
 router.use(verifyToken);
 
-// Summary MUST be before /:id routes to avoid being caught as an id param
-router.get('/summary', (req: any, res) => {
-  const db = getDb();
-  const uid = req.user.id;
-  const rows = db.prepare(`
-    SELECT type, SUM(amount) as total, COUNT(*) as count
-    FROM spend_payout WHERE student_id=? GROUP BY type
-  `).all(uid) as any[];
-  const spend = rows.find(r => r.type === 'spend')?.total || 0;
-  const payout = rows.find(r => r.type === 'payout')?.total || 0;
-  res.json({ spend, payout, net: payout - spend, entries: rows });
-});
-
 router.get('/', (req: any, res) => {
   const db = getDb();
   const uid = req.user.id;
@@ -62,6 +49,20 @@ router.delete('/:id', (req: any, res) => {
   const uid = req.user.id;
   db.prepare(`DELETE FROM spend_payout WHERE id=? AND student_id=?`).run(req.params.id, uid);
   res.json({ ok: true });
+});
+
+// Summary stats
+router.get('/summary', (req: any, res) => {
+  const db = getDb();
+  const uid = req.user.id;
+  const rows = db.prepare(`
+    SELECT type, SUM(amount) as total, COUNT(*) as count
+    FROM spend_payout WHERE student_id=? GROUP BY type
+  `).all(uid) as any[];
+
+  const spend = rows.find(r => r.type === 'spend')?.total || 0;
+  const payout = rows.find(r => r.type === 'payout')?.total || 0;
+  res.json({ spend, payout, net: payout - spend, entries: rows });
 });
 
 export default router;

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Toaster } from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
 import { useAuthStore } from './store/auth';
 import { api } from './lib/api';
 
@@ -30,6 +30,21 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     if (token && !user) {
       api.me().then(u => setAuth(token, u)).catch(() => logout());
     }
+  }, [token, user]);
+
+  useEffect(() => {
+    if (!token || !user) return;
+    const es = new EventSource(`/api/notifications/stream?token=${token}`);
+    es.addEventListener('plan_graded', (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        toast.success(`Giảng viên đã chấm điểm kế hoạch "${data.title}": ${data.grade || 'Đã nhận xét'}`);
+        qc.invalidateQueries();
+      } catch (err) {
+        console.error(err);
+      }
+    });
+    return () => es.close();
   }, [token, user]);
 
   if (!token) return <Navigate to="/login" replace />;

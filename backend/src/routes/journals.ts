@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { getDb } from '../db/schema';
 import { verifyToken, AuthRequest } from '../middleware/auth';
+import { validateRequest, createJournalSchema, updateJournalSchema } from '../middleware/validate';
 
 const router = Router();
 router.use(verifyToken);
@@ -45,9 +46,8 @@ router.get('/:id', (req: AuthRequest, res) => {
   res.json(parseScreenshots(j));
 });
 
-router.post('/', (req: AuthRequest, res) => {
+router.post('/', validateRequest(createJournalSchema), (req: AuthRequest, res) => {
   const { date, symbol, direction, entry_price, exit_price, sl, tp, lot_size, pnl, rr_ratio, screenshot_url, screenshots, emotion, discipline_score, notes, type, status, linked_plan_id, account_id } = req.body;
-  if (!date || !type) { res.status(400).json({ error: 'date and type required' }); return; }
   try {
     const db = getDb();
     const id = uuidv4();
@@ -62,7 +62,7 @@ router.post('/', (req: AuthRequest, res) => {
   }
 });
 
-router.put('/:id', (req: AuthRequest, res) => {
+router.put('/:id', validateRequest(updateJournalSchema), (req: AuthRequest, res) => {
   const db = getDb();
   const j = db.prepare('SELECT * FROM trade_journals WHERE id = ?').get(req.params.id) as any;
   if (!j) { res.status(404).json({ error: 'Not found' }); return; }

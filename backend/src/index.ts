@@ -11,6 +11,7 @@ import reportsRouter from './routes/reports';
 import accountsRouter from './routes/accounts';
 import spendRouter from './routes/spend';
 import quantRouter from './routes/quant';
+import notificationsRouter from './routes/notifications';
 
 // Initialize DB
 getDb();
@@ -34,6 +35,7 @@ app.use('/api/reports', reportsRouter);
 app.use('/api/accounts', accountsRouter);
 app.use('/api/spend', spendRouter);
 app.use('/api/quant', quantRouter);
+app.use('/api/notifications', notificationsRouter);
 
 app.get('/api/health', (_, res) => res.json({ ok: true }));
 

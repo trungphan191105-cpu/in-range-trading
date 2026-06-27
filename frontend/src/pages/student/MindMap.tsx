@@ -147,13 +147,28 @@ function tick(nodes: GNode[], links: GLink[], cx: number, cy: number) {
     b.vx -= fx / b.mass; b.vy -= fy / b.mass;
   }
 
-  const hub = map.get('hub');
-  if (hub) { hub.vx += (cx - hub.x) * HUB_ANCHOR; hub.vy += (cy - hub.y) * HUB_ANCHOR; }
+  const dpr = window.devicePixelRatio || 1;
+  const minX = 40 * dpr;
+  const maxX = (cx * 2) - 40 * dpr;
+  const minY = 100 * dpr; // Giữ khoảng cách an toàn với navbar phía trên
+  const maxY = (cy * 2) - 40 * dpr;
 
   for (const n of nodes) {
-    if (n.fx !== undefined && n.fy !== undefined) { n.x = n.fx; n.y = n.fy; n.vx = 0; n.vy = 0; continue; }
+    if (n.fx !== undefined && n.fy !== undefined) {
+      n.x = n.fx; n.y = n.fy; n.vx = 0; n.vy = 0;
+      if (n.x < minX) n.x = minX;
+      if (n.x > maxX) n.x = maxX;
+      if (n.y < minY) n.y = minY;
+      if (n.y > maxY) n.y = maxY;
+      continue;
+    }
     n.vx *= DAMPING; n.vy *= DAMPING;
     n.x += n.vx; n.y += n.vy;
+
+    if (n.x < minX) { n.x = minX; n.vx *= -0.5; }
+    if (n.x > maxX) { n.x = maxX; n.vx *= -0.5; }
+    if (n.y < minY) { n.y = minY; n.vy *= -0.5; }
+    if (n.y > maxY) { n.y = maxY; n.vy *= -0.5; }
   }
 }
 
@@ -296,7 +311,8 @@ export default function MindMap() {
       const dpr = window.devicePixelRatio;
       canvas.width  = canvas.offsetWidth  * dpr;
       canvas.height = canvas.offsetHeight * dpr;
-      panRef.current = { x: canvas.width / 2, y: canvas.height / 2 };
+      panRef.current = { x: 0, y: 0 };
+      targetPanRef.current = { x: 0, y: 0 };
       builtRef.current = false;
     };
     resize();
@@ -365,16 +381,6 @@ export default function MindMap() {
       if (n) { n.fx = wx - dragNodeRef.current.offX; n.fy = wy - dragNodeRef.current.offY; }
       return;
     }
-    if (panDragRef.current) {
-      const canvas = canvasRef.current!;
-      const rect = canvas.getBoundingClientRect();
-      const dpr = window.devicePixelRatio;
-      panRef.current = {
-        x: panDragRef.current.startPanX + (e.clientX - rect.left) * dpr - panDragRef.current.startX,
-        y: panDragRef.current.startPanY + (e.clientY - rect.top)  * dpr - panDragRef.current.startY,
-      };
-      return;
-    }
     const hit = hitTest(e.clientX, e.clientY);
     const id = hit?.id ?? null;
     if (id !== hoverRef.current) { hoverRef.current = id; setHoverId(id); }
@@ -383,20 +389,18 @@ export default function MindMap() {
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
     const hit = hitTest(e.clientX, e.clientY);
+    const { wx, wy } = getWorldCoords(e);
     if (hit) {
-      const { wx, wy } = getWorldCoords(e);
       dragNodeRef.current = { id: hit.id, offX: wx - hit.x, offY: wy - hit.y };
       if (canvasRef.current) canvasRef.current.style.cursor = 'grabbing';
     } else {
-      const canvas = canvasRef.current!;
-      const rect = canvas.getBoundingClientRect();
-      const dpr = window.devicePixelRatio;
-      panDragRef.current = {
-        startX: (e.clientX - rect.left) * dpr,
-        startY: (e.clientY - rect.top) * dpr,
-        startPanX: panRef.current.x,
-        startPanY: panRef.current.y,
-      };
+      const hub = nodesRef.current.find(n => n.id === 'hub');
+      if (hub) {
+        hub.fx = wx;
+        hub.fy = wy;
+        dragNodeRef.current = { id: 'hub', offX: 0, offY: 0 };
+        if (canvasRef.current) canvasRef.current.style.cursor = 'grabbing';
+      }
     }
   }, [hitTest]);
 
@@ -411,7 +415,6 @@ export default function MindMap() {
   }, []);
 
   const onClick = useCallback((e: React.MouseEvent) => {
-    if (panDragRef.current) return;
     const hit = hitTest(e.clientX, e.clientY);
     if (hit?.route) navigate(hit.route);
   }, [hitTest, navigate]);
@@ -454,15 +457,6 @@ export default function MindMap() {
         const wy = (sy - panRef.current.y) / zoomRef.current;
         const n = nodesRef.current.find(x => x.id === dragNodeRef.current!.id);
         if (n) { n.fx = wx - dragNodeRef.current.offX; n.fy = wy - dragNodeRef.current.offY; }
-      } else if (panDragRef.current) {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const rect = canvas.getBoundingClientRect();
-        const dpr = window.devicePixelRatio;
-        panRef.current = {
-          x: panDragRef.current.startPanX + (e.clientX - rect.left) * dpr - panDragRef.current.startX,
-          y: panDragRef.current.startPanY + (e.clientY - rect.top)  * dpr - panDragRef.current.startY,
-        };
       }
     };
     const onGlobalUp = () => {
@@ -507,9 +501,9 @@ export default function MindMap() {
             {(Object.keys(THEMES) as ThemeKey[]).map(k => (
               <button key={k} onClick={() => { setTheme(k); builtRef.current = false; setThemeOpen(false); }} style={{
                 padding: '5px 14px', borderRadius: 99, fontSize: 10, fontWeight: 700, cursor: 'pointer',
-                background: k === theme ? T.nodeHub : 'rgba(20,20,28,0.85)',
-                color: k === theme ? T.bg : T.label,
-                border: `1px solid ${k === theme ? T.nodeHub : 'rgba(255,255,255,0.12)'}`,
+                background: k === theme ? (k === 'mono' ? '#ffffff' : T.nodeHub) : 'rgba(20,20,28,0.85)',
+                color: k === theme ? (k === 'mono' ? '#000000' : T.bg) : '#ededf3',
+                border: `1px solid ${k === theme ? (k === 'mono' ? '#000000' : T.nodeHub) : 'rgba(255,255,255,0.12)'}`,
                 letterSpacing: '0.08em', textTransform: 'uppercase',
                 backdropFilter: 'blur(12px)',
                 transition: 'all 0.15s',
@@ -518,10 +512,20 @@ export default function MindMap() {
               </button>
             ))}
             <button onClick={() => {
-              targetZoomRef.current = 1; targetPanRef.current = { x: (canvasRef.current?.width ?? 800) / 2, y: (canvasRef.current?.height ?? 600) / 2 };
+              targetZoomRef.current = 1; targetPanRef.current = { x: 0, y: 0 };
+              const canvas = canvasRef.current;
+              if (canvas) {
+                const hub = nodesRef.current.find(n => n.id === 'hub');
+                if (hub) {
+                  hub.x = canvas.width / 2;
+                  hub.y = canvas.height / 2;
+                  hub.vx = 0;
+                  hub.vy = 0;
+                }
+              }
             }} style={{
               padding: '5px 14px', borderRadius: 99, fontSize: 10, fontWeight: 700, cursor: 'pointer',
-              background: 'rgba(20,20,28,0.85)', color: T.label,
+              background: 'rgba(20,20,28,0.85)', color: '#ededf3',
               border: '1px solid rgba(255,255,255,0.12)', letterSpacing: '0.08em', textTransform: 'uppercase',
               backdropFilter: 'blur(12px)',
             }}>
@@ -532,7 +536,7 @@ export default function MindMap() {
         <button onClick={() => setThemeOpen(p => !p)} style={{
           width: 36, height: 36, borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
           background: 'rgba(20,20,28,0.85)', border: '1px solid rgba(255,255,255,0.12)',
-          backdropFilter: 'blur(12px)', color: T.label, fontSize: 16,
+          backdropFilter: 'blur(12px)', color: '#ededf3', fontSize: 16,
           boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
           transition: 'transform 0.2s',
           transform: themeOpen ? 'rotate(45deg)' : 'none',
