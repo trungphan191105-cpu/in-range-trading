@@ -37,21 +37,27 @@ app.use('/api/quant', quantRouter);
 
 app.get('/api/health', (_, res) => res.json({ ok: true }));
 
-// One-time setup: create admin account (safe to call multiple times)
+// Setup: create admin or student account
 app.post('/api/setup', (req, res) => {
-  const { secret } = req.body;
+  const { secret, name, email, password, role } = req.body;
   if (secret !== (process.env.SETUP_SECRET || 'ixr-setup-2025')) {
     return res.status(403).json({ error: 'Forbidden' });
+  }
+  if (!name || !email || !password) {
+    return res.status(400).json({ error: 'name, email, password required' });
   }
   try {
     const bcrypt = require('bcryptjs');
     const { v4: uuidv4 } = require('uuid');
     const db = getDb();
-    const hash = bcrypt.hashSync('admin123', 10);
-    db.prepare('INSERT OR IGNORE INTO users (id,name,email,password_hash,role) VALUES (?,?,?,?,?)').run(
-      uuidv4(), 'Admin', 'admin@ixr.com', hash, 'admin'
+    const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+    if (existing) return res.status(409).json({ error: 'Email already exists' });
+    const hash = bcrypt.hashSync(password, 10);
+    const id = uuidv4();
+    db.prepare('INSERT INTO users (id,name,email,password_hash,role) VALUES (?,?,?,?,?)').run(
+      id, name, email, hash, role === 'student' ? 'student' : 'admin'
     );
-    res.json({ ok: true, email: 'admin@ixr.com', password: 'admin123' });
+    res.json({ ok: true, id, name, email, role: role === 'student' ? 'student' : 'admin' });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }
