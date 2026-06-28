@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../../store/auth';
 import { api } from '../../lib/api';
 import { Btn, Field, inputStyle } from '../../components/Modal';
 import toast from 'react-hot-toast';
-import { differenceInDays, parseISO } from 'date-fns';
+import { parseISO } from 'date-fns';
 import { AlertTriangle, Clock } from 'lucide-react';
 
 const GLASS_CARD: React.CSSProperties = {
@@ -17,7 +16,7 @@ const GLASS_CARD: React.CSSProperties = {
 };
 
 export default function Settings() {
-  const { user, updateUser, logout } = useAuthStore();
+  const { user, updateUser } = useAuthStore();
   const [name, setName] = useState(user?.name || '');
   const [password, setPassword] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);

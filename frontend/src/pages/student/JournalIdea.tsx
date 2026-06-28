@@ -4,14 +4,14 @@
  */
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, useMemo } from 'react';
-import { Plus, TrendingUp, Share2 } from 'lucide-react';
+import { TrendingUp, Share2 } from 'lucide-react';
 import { api } from '../../lib/api';
 import Modal, { Field, inputStyle, selectStyle, Btn } from '../../components/Modal';
 import MultiImageUpload from '../../components/MultiImageUpload';
 import TradeDetailPanel from '../../components/TradeDetailPanel';
 import { useFilters } from '../../hooks/useFilters';
 import toast from 'react-hot-toast';
-import { EMOTIONS, EmotionBall as EmotionBallPicker, EmotionChip } from '../../components/EmotionBall';
+import { EMOTIONS, EmotionBall as EmotionBallPicker, EmotionChip, type EmotionDef } from '../../components/EmotionBall';
 
 // ── Design tokens (from Journal Ideas.dc.html) ──────────────────────────────
 const FONT = "'Inter', system-ui, sans-serif";
@@ -531,7 +531,7 @@ export default function JournalIdea() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
               <Field label="Emotion">
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 4, padding: '6px 0' }}>
-                  <EmotionBallPicker key="none" emotion={{ id: '' as any, label: 'None', color: '#6b7280', glow: 'rgba(107,114,128,0.3)', eyes: 'neutral' }} size={40} selected={form.emotion === ''} onClick={() => setForm(p => ({ ...p, emotion: '' }))} />
+                  <EmotionBallPicker key="none" emotion={{ id: 'calm', label: 'None', color: '#6b7280', glow: 'rgba(107,114,128,0.3)', eyes: 'neutral' } as EmotionDef} size={40} selected={form.emotion === ''} onClick={() => setForm(p => ({ ...p, emotion: '' }))} />
                   {EMOTIONS.map(em => (
                     <EmotionBallPicker key={em.id} emotion={em} size={40} selected={form.emotion === em.id} onClick={() => setForm(p => ({ ...p, emotion: em.id }))} />
                   ))}

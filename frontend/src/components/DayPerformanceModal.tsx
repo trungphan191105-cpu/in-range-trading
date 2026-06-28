@@ -126,7 +126,7 @@ export default function DayPerformanceModal({ date, isWeek, onClose }: Props) {
                       tickFormatter={v => `$${v.toFixed(0)}`} />
                     <Tooltip
                       contentStyle={{ background: 'rgba(13,13,13,0.96)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, fontSize: 12 }}
-                      formatter={(v: number) => [fmt$(v), 'Cumulative']}
+                      formatter={(v) => [fmt$(Number(v)), 'Cumulative']}
                     />
                     <Area type="monotone" dataKey="pnl" stroke={lineColor} strokeWidth={1.8} fill="url(#dayGrad)" dot={false} />
                   </AreaChart>

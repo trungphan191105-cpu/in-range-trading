@@ -24,14 +24,6 @@ const STATUS_LABEL: Record<string, string> = { draft: 'Draft', published: 'Publi
 const defaultForm = { date: '', title: '', market_bias: '', content: '', status: 'draft', screenshots: [] as string[] };
 
 const FONT = "'Space Grotesk', 'Inter', system-ui, sans-serif";
-const GLASS: React.CSSProperties = {
-  background: 'rgba(20,21,23,0.42)',
-  backdropFilter: 'blur(20px) saturate(125%)',
-  WebkitBackdropFilter: 'blur(20px) saturate(125%)',
-  border: '1px solid rgba(255,255,255,0.085)',
-  boxShadow: '0 10px 28px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
-};
-
 /* ── Glass pill button ── */
 function GlassPill({ active, color = '#F8FAFC', onClick, children }: { active: boolean; color?: string; onClick: () => void; children: React.ReactNode }) {
   const [hov, setHov] = useState(false);

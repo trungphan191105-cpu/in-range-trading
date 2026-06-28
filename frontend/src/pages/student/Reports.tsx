@@ -11,7 +11,7 @@ import { api } from '../../lib/api';
 import TradeDetailPanel from '../../components/TradeDetailPanel';
 import { EmotionChip } from '../../components/EmotionBall';
 import { useFilters } from '../../hooks/useFilters';
-import { RotateCcw, TrendingUp, TrendingDown, Activity, Target, Search, Filter, Printer } from 'lucide-react';
+import { RotateCcw, TrendingUp, Activity, Target, Search, Filter, Printer } from 'lucide-react';
 import { inputStyle, selectStyle } from '../../components/Modal';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -187,7 +187,136 @@ export default function Reports({ studentId }: { studentId?: string }) {
                 <YAxis tick={{ fill: 'rgba(205,205,205,0.42)', fontSize: 9 }} tickLine={false} axisLine={false} tickFormatter={v => `$${v}`} width={54} />
                 <Tooltip
                   contentStyle={{ background: 'rgba(16,17,19,0.97)', border: '1px solid rgba(255,255,255,0.085)', borderRadius: 10, fontSize: 11, color: '#f3f3f3' }}
-                  formatter={(v: number) => [`$${Number(v).toFixed(2)}`, 'Equity']}
+                  formatter={(v) => ['$' + Number(v).toFixed(2), 'Equity']}
+                />
+                <Area type="monotone" dataKey="equity" stroke={MINT} strokeWidth={1.8} fill="url(#eqGrad)" dot={false} />
+              </AreaChart>
+
+            </ResponsiveContainer>
+          ) : (
+            <div style={{ height: 190, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(180,180,180,0.3)', fontSize: 12 }}>No data yet</div>
+          )}
+        </div>
+
+        {/* PnL Histogram */}
+        <div style={{ ...CARD, padding: '18px 20px' }}>
+          <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(205,205,205,0.42)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 16 }}>Daily P&L — Wins and Losses</div>
+          {histData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={190}>
+              <BarChart data={histData} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
+                <CartesianGrid stroke="rgba(255,255,255,0.04)" vertical={false} />
+                <XAxis dataKey="date" tick={{ fill: 'rgba(205,205,205,0.42)', fontSize: 9 }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
+                <YAxis tick={{ fill: 'rgba(205,205,205,0.42)', fontSize: 9 }} tickLine={false} axisLine={false} tickFormatter={v => '$' + v} width={54} />
+                <Tooltip
+                  contentStyle={{ background: 'rgba(16,17,19,0.97)', border: '1px solid rgba(255,255,255,0.085)', borderRadius: 10, fontSize: 11, color: '#f3f3f3' }}
+                  formatter={(v) => ['$' + Number(v).toFixed(2), 'P&L']}
+                />
+                <Bar dataKey="pnl" radius={[3, 3, 0, 0]}>
+                  {histData.map((entry: any, i: number) => (
+                    <Cell key={i} fill={entry.pnl >= 0 ? MINT : ROSE} fillOpacity={0.75} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+
+            <div style={{ height: 190, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(180,180,180,0.3)', fontSize: 12 }}>No data yet</div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Transactions table ── */}
+      <div style={{ ...CARD, overflow: 'hidden' }}>
+        {/* Table header */}
+        <div style={{ padding: '14px 18px 12px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(205,205,205,0.42)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>
+            Transactions — {allTrades.length} trades
+          </div>
+          {allTrades.length > PAGE_SIZE && (
+            <div style={{ fontSize: 10, color: 'rgba(180,180,180,0.3)' }}>Page {page} of {totalPages}</div>
+          )}
+        </div>
+
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 800 }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                {['Date', 'Symbol', 'Direction', 'Entry', 'Exit', 'Lot', 'P&L', 'R:R', 'Emotion', 'Status'].map(h => (
+                  <th key={h} style={{ padding: '9px 14px', textAlign: 'left', fontSize: 9, fontWeight: 700, color: 'rgba(205,205,205,0.42)', textTransform: 'uppercase', letterSpacing: '0.1em', whiteSpace: 'nowrap' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {paginated.length === 0 ? (
+                <tr>
+                  <td colSpan={10} style={{ padding: '48px 0', textAlign: 'center', color: 'rgba(180,180,180,0.3)', fontSize: 13 }}>No trades match the current filters</td>
+                </tr>
+              ) : paginated.map((t: any) => {
+                const pnl = Number(t.pnl ?? 0);
+                const pos = pnl >= 0;
+                return (
+                  <tr key={t.id} onClick={() => setSelected(t)}
+                    style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', cursor: 'pointer', transition: 'background 0.12s' }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)'; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}>
+                    <td style={{ ...tds, color: 'rgba(210,210,210,0.5)', fontFamily: 'ui-monospace, monospace', fontSize: 11 }}>{t.date}</td>
+                    <td style={{ ...tds, fontWeight: 700, color: '#f3f3f3' }}>{t.symbol || '—'}</td>
+                    <td style={tds}>
+                      <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 7px', borderRadius: 5, border: `1px solid ${t.direction === 'long' ? 'rgba(95,214,164,0.35)' : 'rgba(239,139,120,0.35)'}`, color: t.direction === 'long' ? MINT : ROSE, letterSpacing: '0.06em' }}>
+                        {t.direction === 'long' ? '↑ LONG' : t.direction === 'short' ? '↓ SHORT' : '—'}
+                      </span>
+                    </td>
+                    <td style={{ ...tds, color: 'rgba(210,210,210,0.5)', fontFamily: 'ui-monospace, monospace', fontSize: 11 }}>{t.entry_price ?? '—'}</td>
+                    <td style={{ ...tds, color: 'rgba(210,210,210,0.5)', fontFamily: 'ui-monospace, monospace', fontSize: 11 }}>{t.exit_price ?? '—'}</td>
+                    <td style={{ ...tds, color: 'rgba(210,210,210,0.5)' }}>{t.lot_size ?? '—'}</td>
+                    <td style={{ ...tds, fontWeight: 700, color: t.pnl != null ? (pos ? MINT : ROSE) : 'rgba(205,205,205,0.42)', textShadow: t.pnl != null ? `0 0 10px ${pos ? MINT : ROSE}33` : 'none' }}>
+                      {t.pnl != null ? `${pos ? '+' : ''}$${Math.abs(pnl).toFixed(2)}` : '—'}
+                    </td>
+                    <td style={{ ...tds, color: BLUE }}>{t.rr_ratio ? `1:${t.rr_ratio}` : '—'}</td>
+                    <td style={tds}>
+                      {t.emotion ? <EmotionChip emotionId={t.emotion} /> : <span style={{ color: 'rgba(180,180,180,0.3)' }}>—</span>}
+                    </td>
+                    <td style={tds}>
+                      <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 7px', borderRadius: 5, border: `1px solid ${t.status === 'open' ? 'rgba(96,165,250,0.3)' : 'rgba(95,214,164,0.3)'}`, color: t.status === 'open' ? BLUE : MINT }}>
+                        {t.status === 'open' ? 'OPEN' : 'CLOSED'}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div style={{ display: 'flex', gap: 4, padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.07)', justifyContent: 'center' }}>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+              <button key={p} onClick={() => setPage(p)}
+                style={{ width: 28, height: 28, borderRadius: 7, border: `1px solid ${page === p ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.07)'}`, background: page === p ? 'rgba(255,255,255,0.09)' : 'transparent', color: page === p ? '#f3f3f3' : 'rgba(205,205,205,0.42)', fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.12s' }}>
+                {p}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {selected && (
+        <TradeDetailPanel
+          trade={selected}
+          onClose={() => setSelected(null)}
+          onEdit={() => {}}
+          onDelete={() => { setSelected(null); }}
+          onToggleStatus={async (t: any) => {
+            await api.updateJournal(t.id, { status: t.status === 'open' ? 'closed' : 'open' });
+            qc.invalidateQueries({ queryKey: ['journals'] }); setSelected(null);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+ + Number(v).toFixed(2), 'Equity']}
                 />
                 <Area type="monotone" dataKey="equity" stroke={MINT} strokeWidth={1.8} fill="url(#eqGrad)" dot={false} />
               </AreaChart>
@@ -208,7 +337,7 @@ export default function Reports({ studentId }: { studentId?: string }) {
                 <YAxis tick={{ fill: 'rgba(205,205,205,0.42)', fontSize: 9 }} tickLine={false} axisLine={false} tickFormatter={v => `$${v}`} width={54} />
                 <Tooltip
                   contentStyle={{ background: 'rgba(16,17,19,0.97)', border: '1px solid rgba(255,255,255,0.085)', borderRadius: 10, fontSize: 11, color: '#f3f3f3' }}
-                  formatter={(v: number) => [`$${Number(v).toFixed(2)}`, 'P&L']}
+                  formatter={(v) => [`${Number(v).toFixed(2)}`, 'P&L']}
                 />
                 <Bar dataKey="pnl" radius={[3, 3, 0, 0]}>
                   {histData.map((entry: any, i: number) => (
@@ -249,7 +378,7 @@ export default function Reports({ studentId }: { studentId?: string }) {
                 <tr>
                   <td colSpan={10} style={{ padding: '48px 0', textAlign: 'center', color: 'rgba(180,180,180,0.3)', fontSize: 13 }}>No trades match the current filters</td>
                 </tr>
-              ) : paginated.map((t: any, idx: number) => {
+              ) : paginated.map((t: any) => {
                 const pnl = Number(t.pnl ?? 0);
                 const pos = pnl >= 0;
                 return (

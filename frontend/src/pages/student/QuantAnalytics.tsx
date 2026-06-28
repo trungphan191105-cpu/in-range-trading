@@ -3,7 +3,7 @@
  * Barrier Option EV · Convex Payoff · Risk Geometry Surface (3D) · Monte Carlo Phase Space
  * Toy vs Real Strategy · Ruin Boundary · Funded Phase Modeling
  */
-import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Lock, Unlock, TrendingUp, Activity, BarChart2, Target, Brain,
@@ -13,7 +13,7 @@ import { api } from '../../lib/api';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   ScatterChart, Scatter, ReferenceLine, CartesianGrid,
-  AreaChart, Area, PieChart, Pie, Cell, BarChart, Bar, ComposedChart,
+  AreaChart, Area, PieChart, Pie, Cell, BarChart, Bar,
 } from 'recharts';
 import * as THREE from 'three';
 
@@ -550,7 +550,6 @@ export default function QuantAnalytics() {
   // Equity curves
   const equityData = useMemo(() => {
     let cumRaw = 0, cumFiltered = 0, cumToy = 0;
-    let filtIdx = 0, toyIdx = 0;
     return trades.map((t, i) => {
       cumRaw += Number(t.pnl);
       const pt: any = { i: i + 1, raw: parseFloat(cumRaw.toFixed(2)) };

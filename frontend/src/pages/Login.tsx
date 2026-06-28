@@ -59,12 +59,8 @@ function NavBar({ onSignIn, onGetStarted }: { onSignIn: () => void; onGetStarted
 
 // ── Fey dark terminal hero visual ──
 function HeroVisual() {
-  const [tick, setTick] = useState(0);
-  useEffect(() => { const id = setInterval(() => setTick(t => t + 1), 2800); return () => clearInterval(id); }, []);
-
   // Sparkline points (normalized 0-1 for positive trend)
   const sparkPos = [0.62, 0.58, 0.64, 0.55, 0.50, 0.44, 0.48, 0.38, 0.32, 0.28, 0.22, 0.18];
-  const sparkNeg = [0.22, 0.28, 0.32, 0.40, 0.36, 0.45, 0.52, 0.48, 0.58, 0.64, 0.68, 0.75];
 
   function sparkPath(pts: number[], w: number, h: number) {
     return pts.map((y, i) => `${i === 0 ? 'M' : 'L'} ${(i / (pts.length - 1)) * w} ${y * h}`).join(' ');
