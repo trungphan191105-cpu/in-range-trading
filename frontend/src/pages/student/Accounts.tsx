@@ -35,7 +35,6 @@ const DEFAULT_FORM = { name: '', prop_firm: '', account_type: 'prop', phase: 'ch
 
 const MINT = '#5fd6a4';
 const ROSE = '#ef8b78';
-const AMBER = '#FBBF24';
 
 // ── Account card — glass coal ────────────────────────────────────────────────
 function AccountCard({ a, studentId, onEdit, onDelete }: { a: any; studentId?: string; onEdit: () => void; onDelete: () => void }) {
@@ -214,7 +213,7 @@ export default function Accounts({ studentId }: { studentId?: string }) {
     return () => window.removeEventListener('paste', onPaste);
   }, [modal]);
 
-  const params = studentId ? { studentId } : {};
+  const params: Record<string, string> = studentId ? { studentId } : {};
   const { data: accounts = [] } = useQuery({ queryKey: ['accounts', studentId], queryFn: () => api.getAccounts(params) });
 
   const f = (k: string) => (e: React.ChangeEvent<any>) => setForm(p => ({ ...p, [k]: e.target.value }));

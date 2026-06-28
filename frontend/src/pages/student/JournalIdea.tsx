@@ -4,7 +4,7 @@
  */
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, useMemo } from 'react';
-import { Plus, TrendingUp, Share2 } from 'lucide-react';
+import { TrendingUp, Share2 } from 'lucide-react';
 import { api } from '../../lib/api';
 import Modal, { Field, inputStyle, selectStyle, Btn } from '../../components/Modal';
 import MultiImageUpload from '../../components/MultiImageUpload';
@@ -531,7 +531,10 @@ export default function JournalIdea() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
               <Field label="Emotion">
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 4, padding: '6px 0' }}>
-                  <EmotionBallPicker key="none" emotion={{ id: '' as any, label: 'None', color: '#6b7280', glow: 'rgba(107,114,128,0.3)', eyes: 'neutral' }} size={40} selected={form.emotion === ''} onClick={() => setForm(p => ({ ...p, emotion: '' }))} />
+                  <button type="button" onClick={() => setForm(p => ({ ...p, emotion: '' }))} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, padding: '6px 4px', borderRadius: 10, outline: form.emotion === '' ? '2px solid #6b7280' : '2px solid transparent', outlineOffset: 2 }}>
+                    <svg width={40} height={40} viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#6b728033" stroke="#6b728066" strokeWidth="1"/><text x="12" y="16" textAnchor="middle" fontSize="10" fill="#9ca3af">–</text></svg>
+                    <span style={{ fontSize: 9, fontWeight: 600, color: form.emotion === '' ? '#9ca3af' : '#6b7280' }}>None</span>
+                  </button>
                   {EMOTIONS.map(em => (
                     <EmotionBallPicker key={em.id} emotion={em} size={40} selected={form.emotion === em.id} onClick={() => setForm(p => ({ ...p, emotion: em.id }))} />
                   ))}
