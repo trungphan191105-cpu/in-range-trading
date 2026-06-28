@@ -73,33 +73,32 @@ app.post('/api/seed-demo', (req, res) => {
     const { v4: uuidv4 } = require('uuid');
     const db = getDb();
 
+    // Temporarily disable FK checks for seeding
+    db.exec('PRAGMA foreign_keys = OFF');
+
     const sid = studentId || db.prepare(`SELECT id FROM users WHERE role='student' LIMIT 1`).get() as any;
     const uid = typeof sid === 'string' ? sid : sid?.id;
-    if (!uid) return res.status(400).json({ error: 'No student found. Register a student first.' });
+    if (!uid) { db.exec('PRAGMA foreign_keys = ON'); return res.status(400).json({ error: 'No student found.' }); }
 
-    // 3 accounts
-    const accounts = [
-      { name: 'FTMO #1 — 100K',   prop_firm: 'FTMO',     account_type: 'prop', phase: 'funded',    initial_balance: 100000, color: '#5fd6a4' },
-      { name: 'Apex #2 — 50K',    prop_firm: 'Apex',     account_type: 'prop', phase: 'challenge', initial_balance: 50000,  color: '#60A5FA' },
-      { name: 'TFT #3 — 150K',    prop_firm: 'TFT',      account_type: 'prop', phase: 'funded',    initial_balance: 150000, color: '#A78BFA' },
+    // Create 3 accounts
+    const accDefs = [
+      { name: 'FTMO #1 — 100K', prop_firm: 'FTMO', phase: 'funded',    initial_balance: 100000, color: '#5fd6a4' },
+      { name: 'Apex #2 — 50K',  prop_firm: 'Apex', phase: 'challenge', initial_balance: 50000,  color: '#60A5FA' },
+      { name: 'TFT #3 — 150K',  prop_firm: 'TFT',  phase: 'funded',    initial_balance: 150000, color: '#A78BFA' },
     ];
     const accIds: string[] = [];
-    for (const a of accounts) {
-      const id = uuidv4();
-      accIds.push(id);
-      db.prepare(`INSERT OR IGNORE INTO accounts
-        (id,student_id,name,prop_firm,account_type,phase,currency,initial_balance,current_balance,max_daily_loss_pct,max_total_drawdown_pct,profit_target_pct,color)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
-      `).run(id, uid, a.name, a.prop_firm, a.account_type, a.phase, 'USD', a.initial_balance, a.initial_balance, 5, 10, 8, a.color);
+    for (const a of accDefs) {
+      const id = uuidv4(); accIds.push(id);
+      db.prepare(`INSERT OR IGNORE INTO accounts (id,student_id,name,prop_firm,account_type,phase,currency,initial_balance,current_balance,max_daily_loss_pct,max_total_drawdown_pct,profit_target_pct,color) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+        .run(id, uid, a.name, a.prop_firm, 'prop', a.phase, 'USD', a.initial_balance, a.initial_balance, 5, 10, 8, a.color);
     }
 
     const symbols = ['NQ', 'ES'];
     const emotions = ['joy','calm','confident','sadness','anxiety','anger','fearful','greedy','revenge'];
-    // Check if account_id column exists
     const cols = (db.prepare(`PRAGMA table_info(trade_journals)`).all() as any[]).map((c: any) => c.name);
-    const hasAccountId = cols.includes('account_id');
+    const hasAccId = cols.includes('account_id');
 
-    const insertTrade = db.prepare(hasAccountId
+    const insertTrade = db.prepare(hasAccId
       ? `INSERT INTO trade_journals (id,student_id,account_id,date,symbol,direction,entry_price,exit_price,sl,tp,lot_size,pnl,rr_ratio,emotion,discipline_score,notes,type,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
       : `INSERT INTO trade_journals (id,student_id,date,symbol,direction,entry_price,exit_price,sl,tp,lot_size,pnl,rr_ratio,emotion,discipline_score,notes,type,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
     );
@@ -129,7 +128,7 @@ app.post('/api/seed-demo', (req, res) => {
       const lots = parseFloat(rand(1, 5).toFixed(1));
       const accId = accIds[i % 3];
 
-      const baseArgs = hasAccountId
+      const baseArgs = hasAccId
         ? [uuidv4(), uid, accId, dateStr, sym, dir, entry, exit, sl, tp, lots, pnl, rr]
         : [uuidv4(), uid, dateStr, sym, dir, entry, exit, sl, tp, lots, pnl, rr];
 
@@ -142,8 +141,10 @@ app.post('/api/seed-demo', (req, res) => {
       count++;
     }
 
+    db.exec('PRAGMA foreign_keys = ON');
     res.json({ ok: true, trades: count, accounts: accIds.length, studentId: uid });
   } catch (e: any) {
+    try { getDb().exec('PRAGMA foreign_keys = ON'); } catch {}
     res.status(500).json({ error: e.message });
   }
 });
