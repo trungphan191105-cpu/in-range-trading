@@ -95,10 +95,14 @@ app.post('/api/seed-demo', (req, res) => {
 
     const symbols = ['NQ', 'ES'];
     const emotions = ['joy','calm','confident','sadness','anxiety','anger','fearful','greedy','revenge'];
-    const insertTrade = db.prepare(`INSERT INTO trade_journals
-      (id,student_id,account_id,date,symbol,direction,entry_price,exit_price,sl,tp,lot_size,pnl,rr_ratio,emotion,discipline_score,notes,type,status)
-      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-    `);
+    // Check if account_id column exists
+    const cols = (db.prepare(`PRAGMA table_info(trade_journals)`).all() as any[]).map((c: any) => c.name);
+    const hasAccountId = cols.includes('account_id');
+
+    const insertTrade = db.prepare(hasAccountId
+      ? `INSERT INTO trade_journals (id,student_id,account_id,date,symbol,direction,entry_price,exit_price,sl,tp,lot_size,pnl,rr_ratio,emotion,discipline_score,notes,type,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+      : `INSERT INTO trade_journals (id,student_id,date,symbol,direction,entry_price,exit_price,sl,tp,lot_size,pnl,rr_ratio,emotion,discipline_score,notes,type,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+    );
 
     const rand = (min: number, max: number) => Math.random() * (max - min) + min;
     const pick = <T>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
@@ -125,9 +129,12 @@ app.post('/api/seed-demo', (req, res) => {
       const lots = parseFloat(rand(1, 5).toFixed(1));
       const accId = accIds[i % 3];
 
+      const baseArgs = hasAccountId
+        ? [uuidv4(), uid, accId, dateStr, sym, dir, entry, exit, sl, tp, lots, pnl, rr]
+        : [uuidv4(), uid, dateStr, sym, dir, entry, exit, sl, tp, lots, pnl, rr];
+
       insertTrade.run(
-        uuidv4(), uid, accId, dateStr, sym, dir,
-        entry, exit, sl, tp, lots, pnl, rr,
+        ...baseArgs,
         pick(emotions), Math.floor(rand(4, 10)),
         pick(['Followed plan', 'Revenge trade', 'Setup valid', 'FOMO entry', 'Patient entry', 'Missed SL move']),
         'idea', 'closed'
