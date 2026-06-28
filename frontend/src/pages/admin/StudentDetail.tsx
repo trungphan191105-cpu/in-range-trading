@@ -6,7 +6,7 @@ import { api } from '../../lib/api';
 import Reports from '../student/Reports';
 import JournalPsychology from '../student/JournalPsychology';
 import Accounts from '../student/Accounts';
-import Modal, { Field, selectStyle, inputStyle, Btn } from '../../components/Modal';
+import Modal, { Field, inputStyle, Btn } from '../../components/Modal';
 import toast from 'react-hot-toast';
 
 const gradeColor: Record<string, string> = { A: 'var(--green)', B: 'var(--blue)', C: 'var(--yellow)', D: 'var(--red)' };

@@ -35,7 +35,6 @@ const DEFAULT_FORM = { name: '', prop_firm: '', account_type: 'prop', phase: 'ch
 
 const MINT = '#5fd6a4';
 const ROSE = '#ef8b78';
-const AMBER = '#FBBF24';
 
 // ── Account card — glass coal ────────────────────────────────────────────────
 function AccountCard({ a, studentId, onEdit, onDelete }: { a: any; studentId?: string; onEdit: () => void; onDelete: () => void }) {

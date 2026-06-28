@@ -34,7 +34,7 @@ export default function AdminOverview() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#2a2f3e" horizontal={false} />
                 <XAxis type="number" tick={{ fill: '#64748b', fontSize: 11 }} tickLine={false} axisLine={false} tickFormatter={v => `$${v}`} />
                 <YAxis type="category" dataKey="name" tick={{ fill: '#64748b', fontSize: 11 }} tickLine={false} axisLine={false} width={80} />
-                <Tooltip contentStyle={{ background: '#1e2230', border: '1px solid #2a2f3e', borderRadius: 8, fontSize: 12 }} formatter={(v: number) => [`$${v.toFixed(2)}`, 'PnL']} />
+                <Tooltip contentStyle={{ background: '#1e2230', border: '1px solid #2a2f3e', borderRadius: 8, fontSize: 12 }} formatter={(v) => [`$${Number(v).toFixed(2)}`, 'PnL']} />
                 <Bar dataKey="total_pnl" radius={[0, 4, 4, 0]}>
                   {students.map((s, i) => <Cell key={i} fill={s.total_pnl >= 0 ? '#22c55e' : '#ef4444'} />)}
                 </Bar>
@@ -44,6 +44,7 @@ export default function AdminOverview() {
             <div style={{ height: 220, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>Chưa có dữ liệu</div>
           )}
         </div>
+
 
         {/* Win rate ranking */}
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 }}>

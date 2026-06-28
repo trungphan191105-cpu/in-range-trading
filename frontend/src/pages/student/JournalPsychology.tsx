@@ -1,11 +1,11 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Plus, Brain, MessageSquare } from 'lucide-react';
+import { Brain, MessageSquare } from 'lucide-react';
 import { api } from '../../lib/api';
 import Modal, { Field, inputStyle, Btn } from '../../components/Modal';
 import { useAuthStore } from '../../store/auth';
 import toast from 'react-hot-toast';
-import { EMOTIONS, emotionMap, EmotionBall, EmotionDisplay } from '../../components/EmotionBall';
+import { EMOTIONS, EmotionBall, EmotionDisplay } from '../../components/EmotionBall';
 
 const defaultForm = { date: '', emotion: 'calm', discipline_score: '7', notes: '' };
 
