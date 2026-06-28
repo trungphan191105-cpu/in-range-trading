@@ -11,7 +11,7 @@ import { api } from '../../lib/api';
 import TradeDetailPanel from '../../components/TradeDetailPanel';
 import { EmotionChip } from '../../components/EmotionBall';
 import { useFilters } from '../../hooks/useFilters';
-import { RotateCcw, TrendingUp, TrendingDown, Activity, Target, Search, Filter, Printer } from 'lucide-react';
+import { RotateCcw, TrendingUp, Activity, Target, Search, Filter, Printer } from 'lucide-react';
 import { inputStyle, selectStyle } from '../../components/Modal';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -187,7 +187,7 @@ export default function Reports({ studentId }: { studentId?: string }) {
                 <YAxis tick={{ fill: 'rgba(205,205,205,0.42)', fontSize: 9 }} tickLine={false} axisLine={false} tickFormatter={v => `$${v}`} width={54} />
                 <Tooltip
                   contentStyle={{ background: 'rgba(16,17,19,0.97)', border: '1px solid rgba(255,255,255,0.085)', borderRadius: 10, fontSize: 11, color: '#f3f3f3' }}
-                  formatter={(v: number) => [`$${Number(v).toFixed(2)}`, 'Equity']}
+                  formatter={(v) => [`$${Number(v ?? 0).toFixed(2)}`, 'Equity']}
                 />
                 <Area type="monotone" dataKey="equity" stroke={MINT} strokeWidth={1.8} fill="url(#eqGrad)" dot={false} />
               </AreaChart>
@@ -208,7 +208,7 @@ export default function Reports({ studentId }: { studentId?: string }) {
                 <YAxis tick={{ fill: 'rgba(205,205,205,0.42)', fontSize: 9 }} tickLine={false} axisLine={false} tickFormatter={v => `$${v}`} width={54} />
                 <Tooltip
                   contentStyle={{ background: 'rgba(16,17,19,0.97)', border: '1px solid rgba(255,255,255,0.085)', borderRadius: 10, fontSize: 11, color: '#f3f3f3' }}
-                  formatter={(v: number) => [`$${Number(v).toFixed(2)}`, 'P&L']}
+                  formatter={(v) => [`$${Number(v ?? 0).toFixed(2)}`, 'P&L']}
                 />
                 <Bar dataKey="pnl" radius={[3, 3, 0, 0]}>
                   {histData.map((entry: any, i: number) => (
@@ -249,7 +249,7 @@ export default function Reports({ studentId }: { studentId?: string }) {
                 <tr>
                   <td colSpan={10} style={{ padding: '48px 0', textAlign: 'center', color: 'rgba(180,180,180,0.3)', fontSize: 13 }}>No trades match the current filters</td>
                 </tr>
-              ) : paginated.map((t: any, idx: number) => {
+              ) : paginated.map((t: any, _idx: number) => {
                 const pnl = Number(t.pnl ?? 0);
                 const pos = pnl >= 0;
                 return (

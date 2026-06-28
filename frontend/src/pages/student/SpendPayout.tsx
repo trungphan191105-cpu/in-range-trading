@@ -3,7 +3,7 @@
  */
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, TrendingUp, TrendingDown, DollarSign, Trash2, Pencil, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Trash2, Pencil, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { api } from '../../lib/api';
 import Modal, { Field, inputStyle, selectStyle, Btn } from '../../components/Modal';
 import toast from 'react-hot-toast';

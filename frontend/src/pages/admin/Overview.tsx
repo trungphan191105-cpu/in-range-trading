@@ -2,7 +2,6 @@ import { useQuery } from '@tanstack/react-query';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { api } from '../../lib/api';
 import KPIStrip from '../../components/KPIStrip';
-import { Users, TrendingUp, Activity } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function AdminOverview() {
@@ -34,7 +33,7 @@ export default function AdminOverview() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#2a2f3e" horizontal={false} />
                 <XAxis type="number" tick={{ fill: '#64748b', fontSize: 11 }} tickLine={false} axisLine={false} tickFormatter={v => `$${v}`} />
                 <YAxis type="category" dataKey="name" tick={{ fill: '#64748b', fontSize: 11 }} tickLine={false} axisLine={false} width={80} />
-                <Tooltip contentStyle={{ background: '#1e2230', border: '1px solid #2a2f3e', borderRadius: 8, fontSize: 12 }} formatter={(v: number) => [`$${v.toFixed(2)}`, 'PnL']} />
+                <Tooltip contentStyle={{ background: '#1e2230', border: '1px solid #2a2f3e', borderRadius: 8, fontSize: 12 }} formatter={(v) => [`$${Number(v ?? 0).toFixed(2)}`, 'PnL']} />
                 <Bar dataKey="total_pnl" radius={[0, 4, 4, 0]}>
                   {students.map((s, i) => <Cell key={i} fill={s.total_pnl >= 0 ? '#22c55e' : '#ef4444'} />)}
                 </Bar>
