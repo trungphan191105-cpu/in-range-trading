@@ -125,6 +125,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
 
+      {/* ── Global animated ambient orbs ── */}
+      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: '5%', left: '12%', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(95,214,164,0.055) 0%, transparent 65%)', animation: 'orbDrift 20s ease-in-out infinite' }} />
+        <div style={{ position: 'absolute', bottom: '8%', right: '10%', width: 480, height: 480, borderRadius: '50%', background: 'radial-gradient(circle, rgba(78,170,250,0.04) 0%, transparent 65%)', animation: 'orbDrift 25s ease-in-out infinite reverse 5s' }} />
+        <div style={{ position: 'absolute', top: '50%', left: '58%', width: 340, height: 340, borderRadius: '50%', background: 'radial-gradient(circle, rgba(168,100,255,0.03) 0%, transparent 65%)', animation: 'orbDrift 30s ease-in-out infinite 10s' }} />
+        <div style={{ position: 'absolute', top: '30%', right: '30%', width: 260, height: 260, borderRadius: '50%', background: 'radial-gradient(circle, rgba(95,214,164,0.03) 0%, transparent 65%)', animation: 'orbDrift 18s ease-in-out infinite reverse 2s' }} />
+      </div>
+
       {/* ── Floating centered dock ── */}
       <div style={{ position: 'fixed', top: 14, left: 0, right: 0, zIndex: 50, display: 'flex', justifyContent: 'center', pointerEvents: 'none', padding: '0 16px', opacity: navVisible ? 1 : 0, transform: navVisible ? 'translateY(0)' : 'translateY(-12px)', transition: 'opacity 0.22s ease, transform 0.22s ease' }}>
         <header style={{
@@ -218,7 +226,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </header>
       </div>
 
-      <main style={{ marginTop: 82, flex: 1, padding: '24px 28px', minWidth: 0 }}>
+      <main style={{ marginTop: 82, flex: 1, padding: '24px 28px', minWidth: 0, position: 'relative', zIndex: 1 }}>
         {children}
       </main>
     </div>

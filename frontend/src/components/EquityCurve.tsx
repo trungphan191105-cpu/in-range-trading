@@ -16,7 +16,7 @@ function CustomTooltip({ active, payload, label }: any) {
       <div style={{ color: '#6b7280', marginBottom: 4, fontSize: 11, letterSpacing: '0.04em' }}>
         {(() => { try { return format(parseISO(label), 'dd/MM/yyyy'); } catch { return label; } })()}
       </div>
-      <div style={{ color: pos ? '#00e676' : '#ef4444', fontWeight: 700, fontSize: 14, fontFamily: "'DM Serif Display', Georgia, serif" }}>
+      <div style={{ color: pos ? '#00e676' : '#ef4444', fontWeight: 700, fontSize: 14, fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif" }}>
         {pos ? '+' : ''}{v.toFixed(2)} USD
       </div>
     </div>
@@ -42,7 +42,7 @@ export default function EquityCurve({ data, height = 220, title = 'DAILY NET CUM
       {/* Title strip */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <span style={{ fontSize: 10, fontWeight: 600, color: '#6b7280', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{title}</span>
-        <span style={{ fontSize: 14, fontWeight: 700, color: lineColor, letterSpacing: '-0.02em', fontFamily: "'DM Serif Display', Georgia, serif" }}>
+        <span style={{ fontSize: 14, fontWeight: 700, color: lineColor, letterSpacing: '-0.02em', fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif" }}>
           {positive ? '+' : ''}{last.toFixed(2)} USD
         </span>
       </div>

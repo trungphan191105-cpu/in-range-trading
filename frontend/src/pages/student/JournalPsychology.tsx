@@ -5,101 +5,21 @@ import { api } from '../../lib/api';
 import Modal, { Field, inputStyle, Btn } from '../../components/Modal';
 import { useAuthStore } from '../../store/auth';
 import toast from 'react-hot-toast';
-
-// ── Emotion definitions (Inside Out style) ──────────────────────────────────
-const EMOTIONS = [
-  { id: 'joy',          label: 'Joy',          color: '#f5c842', glow: 'rgba(245,200,66,0.45)',   eyes: 'smile'   },
-  { id: 'calm',         label: 'Calm',         color: '#5bc4d4', glow: 'rgba(91,196,212,0.45)',   eyes: 'neutral' },
-  { id: 'confident',    label: 'Confident',    color: '#4ebe96', glow: 'rgba(78,190,150,0.45)',   eyes: 'content' },
-  { id: 'sadness',      label: 'Sadness',      color: '#6fa3e0', glow: 'rgba(111,163,224,0.45)',  eyes: 'sad'     },
-  { id: 'anxiety',      label: 'Anxiety',      color: '#e8965a', glow: 'rgba(232,150,90,0.45)',   eyes: 'nervous' },
-  { id: 'anger',        label: 'Anger',        color: '#d65a5a', glow: 'rgba(214,90,90,0.45)',    eyes: 'angry'   },
-  { id: 'fearful',      label: 'Fear',         color: '#b49fcc', glow: 'rgba(180,159,204,0.45)',  eyes: 'scared'  },
-  { id: 'greedy',       label: 'Greed',        color: '#d4a044', glow: 'rgba(212,160,68,0.45)',   eyes: 'smirk'   },
-  { id: 'revenge',      label: 'Revenge',      color: '#c8746a', glow: 'rgba(200,116,106,0.45)',  eyes: 'angry'   },
-];
-
-const emotionMap = Object.fromEntries(EMOTIONS.map(e => [e.id, e]));
-
-// ── SVG emotion ball component ───────────────────────────────────────────────
-function EmotionBall({ emotion, size = 52, selected, onClick }: { emotion: typeof EMOTIONS[0]; size?: number; selected?: boolean; onClick?: () => void }) {
-  const { color, glow, eyes } = emotion;
-  const r = size / 2;
-
-  const eyePairs: Record<string, [string, string]> = {
-    smile:   ['M10 12 Q12 14 14 12', 'M7 10 Q7.5 9 8.5 10 M15.5 10 Q16.5 9 17 10'],
-    neutral: ['M9 13 L15 13', 'M8 10 H9 M15 10 H16'],
-    content: ['M9.5 13 Q12 14.5 14.5 13', 'M8 10 H9 M15 10 H16'],
-    sad:     ['M9.5 15 Q12 13.5 14.5 15', 'M8 9.5 Q8.5 11 9.5 10 M14.5 10 Q15.5 11 16 9.5'],
-    nervous: ['M9 13 L15 13', 'M7.5 9.5 L8.5 10.5 M15.5 10.5 L16.5 9.5'],
-    angry:   ['M9 15 Q12 13 15 15', 'M7.5 11 L9.5 10 M14.5 10 L16.5 11'],
-    scared:  ['M10 14 Q12 12.5 14 14', 'M8 9 Q9 8 10 10 M14 10 Q15 8 16 9'],
-    smirk:   ['M9 13 Q11 14 13 12', 'M8 10 H9 M15 10 H16'],
-  };
-
-  const [mouth, eyebrows] = eyePairs[eyes] ?? eyePairs.neutral;
-
-  return (
-    <button
-      onClick={onClick}
-      style={{
-        background: 'none', border: 'none', cursor: 'pointer',
-        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
-        padding: '6px 4px', borderRadius: 10,
-        outline: selected ? `2px solid ${color}` : '2px solid transparent',
-        outlineOffset: 2,
-        transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)',
-        transform: selected ? 'scale(1.12)' : 'scale(1)',
-      }}
-    >
-      <svg width={size} height={size} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <radialGradient id={`bg-${emotion.id}`} cx="35%" cy="28%" r="70%">
-            <stop offset="0%" stopColor="#fff" stopOpacity="0.28" />
-            <stop offset="100%" stopColor={color} stopOpacity="1" />
-          </radialGradient>
-          <filter id={`glow-${emotion.id}`}>
-            <feGaussianBlur stdDeviation="2.5" result="blur" />
-            <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-          </filter>
-        </defs>
-        {/* Ball */}
-        <circle cx="12" cy="12" r="10" fill={`url(#bg-${emotion.id})`} filter={selected ? `url(#glow-${emotion.id})` : undefined} />
-        {/* Highlight */}
-        <ellipse cx="9" cy="8" rx="2.5" ry="1.5" fill="rgba(255,255,255,0.22)" />
-        {/* Eyes */}
-        <circle cx="9" cy="10.5" r="1.1" fill="rgba(0,0,0,0.7)" />
-        <circle cx="15" cy="10.5" r="1.1" fill="rgba(0,0,0,0.7)" />
-        {/* Eyebrows */}
-        <path d={eyebrows} stroke="rgba(0,0,0,0.6)" strokeWidth="0.9" fill="none" strokeLinecap="round" />
-        {/* Mouth */}
-        <path d={mouth} stroke="rgba(0,0,0,0.65)" strokeWidth="1.1" fill="none" strokeLinecap="round" />
-      </svg>
-      <span style={{ fontSize: 9, fontWeight: 600, color: selected ? color : '#868f97', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
-        {emotion.label}
-      </span>
-    </button>
-  );
-}
-
-// ── Display ball (smaller, in cards) ────────────────────────────────────────
-function EmotionDisplay({ emotionId }: { emotionId: string }) {
-  const em = emotionMap[emotionId];
-  if (!em) return <span style={{ fontSize: 13, color: '#868f97' }}>—</span>;
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <EmotionBall emotion={em} size={32} />
-      <div>
-        <div style={{ fontWeight: 600, color: em.color, fontSize: 13 }}>{em.label}</div>
-        <div style={{ fontSize: 11, color: '#868f97' }}>Cảm xúc</div>
-      </div>
-    </div>
-  );
-}
+import { EMOTIONS, emotionMap, EmotionBall, EmotionDisplay } from '../../components/EmotionBall';
 
 const defaultForm = { date: '', emotion: 'calm', discipline_score: '7', notes: '' };
 
 interface Props { studentId?: string }
+
+const FONT = "'Inter', system-ui, sans-serif";
+const GLASS: React.CSSProperties = {
+  background: 'rgba(20,21,23,0.42)',
+  backdropFilter: 'blur(20px) saturate(125%)',
+  WebkitBackdropFilter: 'blur(20px) saturate(125%)',
+  border: '1px solid rgba(255,255,255,0.085)',
+  borderRadius: 16,
+  boxShadow: '0 10px 28px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
+};
 
 export default function JournalPsychology({ studentId }: Props) {
   const qc = useQueryClient();
@@ -157,34 +77,35 @@ export default function JournalPsychology({ studentId }: Props) {
   const scoreColor = score >= 7 ? '#4ebe96' : score >= 5 ? '#d4a044' : '#c8746a';
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+    <div style={{ fontFamily: FONT }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
         <div>
-          <div style={{ fontSize: 10, fontWeight: 600, color: '#479ffa', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 4 }}>Trade Journal</div>
-          <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.04em' }}>Tâm lý giao dịch</h2>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.18em', color: 'rgba(220,220,220,0.42)', textTransform: 'uppercase', marginBottom: 5 }}>TRADE JOURNAL</div>
+          <h2 style={{ margin: 0, fontSize: 30, fontWeight: 800, letterSpacing: '-0.01em', color: '#f3f3f3' }}>Tâm lý giao dịch</h2>
         </div>
         {!studentId && (
-          <button onClick={openNew} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'transparent', color: '#e6e6e6', border: '1px solid #e6e6e6', borderRadius: 99, padding: '8px 20px', fontSize: 12, fontWeight: 600, cursor: 'pointer', letterSpacing: '0.02em', transition: 'all 0.3s cubic-bezier(0.16,1,0.3,1)' }}>
-            <Plus size={13} /> New Entry
+          <button onClick={openNew} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px', border: '1px solid rgba(255,255,255,0.13)', borderRadius: 14, background: 'rgba(28,29,31,0.6)', backdropFilter: 'blur(20px) saturate(140%)', WebkitBackdropFilter: 'blur(20px) saturate(140%)', color: '#ededed', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: FONT, boxShadow: '0 8px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)', transition: 'all 0.15s' }}>
+            <span style={{ fontSize: 15, fontWeight: 400, lineHeight: 1 }}>+</span> New Entry
           </button>
         )}
       </div>
 
       {(entries as any[]).length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-muted)' }}>
-          <Brain size={48} style={{ marginBottom: 16, opacity: 0.3 }} />
-          <p>Chưa có nhật ký tâm lý nào</p>
+        <div style={{ textAlign: 'center', padding: '80px 0' }}>
+          <Brain size={44} style={{ marginBottom: 14, opacity: 0.12, color: '#f0f0f0' }} />
+          <p style={{ fontSize: 13, fontWeight: 600, color: 'rgba(210,210,210,0.45)', marginBottom: 4 }}>Chưa có nhật ký tâm lý nào</p>
+          <p style={{ fontSize: 11, color: 'rgba(180,180,180,0.3)' }}>Click "New Entry" để thêm nhật ký đầu tiên</p>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: 13 }}>
           {(entries as any[]).map(e => (
-            <div key={e.id} style={{ background: 'rgba(19,19,19,0.65)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: '16px 18px', transition: 'all 0.3s cubic-bezier(0.16,1,0.3,1)' }}>
+            <div key={e.id} style={{ ...GLASS, padding: '16px 18px', transition: 'all 0.18s cubic-bezier(0.16,1,0.3,1)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 14 }}>
-                <div style={{ fontSize: 12, color: '#868f97', fontWeight: 500 }}>{e.date}</div>
+                <div style={{ fontSize: 12, color: 'rgba(210,210,210,0.45)', fontWeight: 500 }}>{e.date}</div>
                 <div style={{ display: 'flex', gap: 6 }}>
-                  {!studentId && <button onClick={() => openEdit(e)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#868f97', fontSize: 11, padding: '2px 6px' }}>Sửa</button>}
-                  {isAdmin && <button onClick={() => { setFeedbackId(e.id); setFeedbackText(e.admin_feedback || ''); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#479ffa', fontSize: 11, display: 'flex', alignItems: 'center', gap: 3 }}><MessageSquare size={11} /> Góp ý</button>}
-                  {!studentId && <button onClick={() => del(e.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#c8746a', fontSize: 11 }}>Xóa</button>}
+                  {!studentId && <button onClick={() => openEdit(e)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(210,210,210,0.45)', fontSize: 11, padding: '2px 6px', fontFamily: FONT }}>Sửa</button>}
+                  {isAdmin && <button onClick={() => { setFeedbackId(e.id); setFeedbackText(e.admin_feedback || ''); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#60A5FA', fontSize: 11, display: 'flex', alignItems: 'center', gap: 3, fontFamily: FONT }}><MessageSquare size={11} /> Góp ý</button>}
+                  {!studentId && <button onClick={() => del(e.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef8b78', fontSize: 11, fontFamily: FONT }}>Xóa</button>}
                 </div>
               </div>
 
@@ -201,23 +122,23 @@ export default function JournalPsychology({ studentId }: Props) {
                 </div>
               </div>
 
-              {e.notes && <p style={{ fontSize: 12, color: '#cccccc', lineHeight: 1.65, marginTop: 8 }}>{e.notes}</p>}
+              {e.notes && <p style={{ fontSize: 12, color: 'rgba(210,210,210,0.7)', lineHeight: 1.65, marginTop: 8 }}>{e.notes}</p>}
 
               {feedbackId === e.id ? (
-                <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 10, marginTop: 10 }}>
-                  <div style={{ fontSize: 9, fontWeight: 700, color: '#479ffa', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>Góp ý của Mentor</div>
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 10, marginTop: 10 }}>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: '#60A5FA', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>Góp ý của Mentor</div>
                   <textarea value={feedbackText} onChange={ev => setFeedbackText(ev.target.value)} rows={3} placeholder="Nhận xét về tâm lý giao dịch..." style={{ ...inputStyle, fontSize: 12, resize: 'vertical', marginBottom: 8 }} />
                   <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-                    <button onClick={() => setFeedbackId(null)} style={{ background: 'none', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 7, padding: '5px 12px', fontSize: 11, cursor: 'pointer', color: '#868f97' }}>Hủy</button>
-                    <button onClick={() => saveFeedback(e.id)} disabled={savingFeedback} style={{ background: '#479ffa', border: 'none', borderRadius: 7, padding: '5px 12px', fontSize: 11, fontWeight: 700, cursor: 'pointer', color: '#040810' }}>
+                    <button onClick={() => setFeedbackId(null)} style={{ background: 'none', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '5px 12px', fontSize: 11, cursor: 'pointer', color: 'rgba(210,210,210,0.45)', fontFamily: FONT }}>Hủy</button>
+                    <button onClick={() => saveFeedback(e.id)} disabled={savingFeedback} style={{ background: '#60A5FA', border: 'none', borderRadius: 8, padding: '5px 12px', fontSize: 11, fontWeight: 700, cursor: 'pointer', color: '#040810', fontFamily: FONT }}>
                       {savingFeedback ? '...' : 'Lưu'}
                     </button>
                   </div>
                 </div>
               ) : e.admin_feedback ? (
-                <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 10, marginTop: 10, background: 'rgba(71,159,250,0.04)', borderRadius: 8, padding: '10px 12px' }}>
-                  <div style={{ fontSize: 9, fontWeight: 700, color: '#479ffa', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 5, display: 'flex', alignItems: 'center', gap: 4 }}><MessageSquare size={9} /> Góp ý của Mentor</div>
-                  <p style={{ fontSize: 12, color: '#cccccc', lineHeight: 1.6, margin: 0 }}>{e.admin_feedback}</p>
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 10, marginTop: 10, background: 'rgba(96,165,250,0.04)', borderRadius: 10, padding: '10px 12px' }}>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: '#60A5FA', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 5, display: 'flex', alignItems: 'center', gap: 4 }}><MessageSquare size={9} /> Góp ý của Mentor</div>
+                  <p style={{ fontSize: 12, color: 'rgba(210,210,210,0.7)', lineHeight: 1.6, margin: 0 }}>{e.admin_feedback}</p>
                 </div>
               ) : null}
             </div>

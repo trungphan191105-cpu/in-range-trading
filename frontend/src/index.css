@@ -1,26 +1,26 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=DM+Serif+Display:ital@0;1&family=Inter+Tight:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Inter:wght@200;300;400;500;600;700&family=Open+Sauce+One:wght@400;500;600;700;800&family=Nunito+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700;800&family=Inter:wght@200;300;400;500;600;700;800;900&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=DM+Serif+Display:ital@0;1&family=Inter+Tight:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Open+Sauce+One:wght@400;500;600;700;800&family=Nunito+Sans:wght@300;400;500;600;700&display=swap');
 
 @layer base {
   :root {
-    /* ── Fey / Obsidian core ── */
-    --bg:          #0b0b0b;
-    --surface:     rgba(19,19,19,0.72);
-    --surface2:    rgba(26,26,26,0.85);
-    --surface3:    rgba(32,32,32,0.9);
-    --surface-solid: #131313;
-    --card:        rgba(19,19,19,0.65);
+    /* ── Carbon Design System ── */
+    --bg:          #171717;
+    --surface:     rgba(30,30,30,0.5);
+    --surface2:    rgba(38,38,38,0.85);
+    --surface3:    rgba(44,44,44,0.9);
+    --surface-solid: #1c1c1c;
+    --card:        rgba(20,21,23,0.42);
 
-    /* Borders — razor glass */
-    --border:        rgba(255,255,255,0.08);
+    /* Borders — specular glass */
+    --border:        rgba(255,255,255,0.085);
     --border-light:  rgba(255,255,255,0.12);
     --border-glow:   rgba(71,159,250,0.2);
 
-    /* Text — Fey hierarchy */
-    --text:        #e6e6e6;
-    --text-soft:   #cccccc;
-    --text-muted:  #868f97;
-    --text-dim:    #555a60;
+    /* Text — clean hierarchy */
+    --text:        #f3f3f3;
+    --text-soft:   #E2E8F0;
+    --text-muted:  rgba(205,205,205,0.55);
+    --text-dim:    rgba(180,180,180,0.35);
 
     /* Accent — sci-fi cyan/blue */
     --accent:       #479ffa;
@@ -34,11 +34,11 @@
     --ghost:    rgba(255,255,255,0.05);
     --ghost-h:  rgba(255,255,255,0.09);
 
-    /* P&L — Tape Green / Coral Red */
-    --green:     #4ebe96;
-    --green-dim: rgba(78,190,150,0.12);
-    --red:       #c8746a;
-    --red-dim:   rgba(200,116,106,0.12);
+    /* P&L — Soft Mint / Soft Rose */
+    --green:     #5fd6a4;
+    --green-dim: rgba(95,214,164,0.12);
+    --red:       #ef8b78;
+    --red-dim:   rgba(239,139,120,0.12);
     --yellow:    #d4a044;
     --blue:      #479ffa;
 
@@ -58,15 +58,38 @@
   html { font-size: 14px; }
 
   body {
-    background: var(--bg);
-    /* Atmospheric layered background: dot grid + glow orbs */
+    /* ── Carbon Rock Background — 6 layers ── */
+    background-color: #080807;
     background-image:
-      radial-gradient(ellipse 60% 50% at 15% 8%, rgba(71,159,250,0.06) 0%, transparent 70%),
-      radial-gradient(ellipse 50% 40% at 88% 80%, rgba(128,82,255,0.05) 0%, transparent 60%),
-      radial-gradient(circle, rgba(255,255,255,0.025) 1px, transparent 1px);
-    background-size: 100% 100%, 100% 100%, 28px 28px;
+      /* L1: fine rock grain — high-freq fractalNoise */
+      url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512'><filter id='r'><feTurbulence type='fractalNoise' baseFrequency='.48 .32' numOctaves='8' seed='17' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 .10 0 0 0 0 .09 0 0 0 0 .08 0 0 0 22 -6'/></filter><rect width='512' height='512' filter='url(%23r)'/></svg>"),
+      /* L2: coarse rock chunks — low-freq */
+      url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='768' height='768'><filter id='c'><feTurbulence type='fractalNoise' baseFrequency='.18 .12' numOctaves='5' seed='31' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 .14 0 0 0 0 .12 0 0 0 0 .10 0 0 0 14 -5'/></filter><rect width='768' height='768' filter='url(%23c)'/></svg>"),
+      /* L3: depth vignettes — rock masses */
+      radial-gradient(ellipse 75% 60% at 8% 5%,   rgba(58,52,44,.96) 0%, transparent 55%),
+      radial-gradient(ellipse 65% 55% at 92% 96%,  rgba(50,44,36,.94) 0%, transparent 52%),
+      radial-gradient(ellipse 50% 40% at 88% 6%,   rgba(38,34,28,.85) 0%, transparent 50%),
+      radial-gradient(ellipse 55% 45% at 6% 94%,   rgba(44,38,30,.88) 0%, transparent 50%),
+      radial-gradient(ellipse 55% 45% at 50% 50%,  rgba(22,20,17,.40) 0%, transparent 65%),
+      /* L4: crack veins */
+      url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><filter id='v'><feTurbulence type='turbulence' baseFrequency='.9 .6' numOctaves='3' seed='7' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 6 -5.2'/></filter><rect width='400' height='400' filter='url(%23v)'/></svg>"),
+      /* L5: ambient light */
+      radial-gradient(ellipse 80% 25% at 50% 0%,   rgba(180,175,165,.05) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 35% at 50% 48%,  rgba(255,245,220,.02) 0%, transparent 65%),
+      radial-gradient(ellipse 100% 20% at 50% 100%, rgba(0,0,0,.55) 0%, transparent 80%),
+      /* L6: final dark drain */
+      radial-gradient(ellipse 200% 150% at 50% 50%, rgba(11,10,9,.92) 0%, rgba(3,3,2,1) 100%);
+    background-size:
+      512px 512px,
+      768px 768px,
+      100%, 100%, 100%, 100%, 100%,
+      400px 400px,
+      100%, 100%, 100%,
+      100%;
+    background-attachment: fixed;
     color: var(--text);
-    font-family: 'Montserrat', 'Inter Tight', 'Inter', system-ui, sans-serif;
+    font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+    font-feature-settings: 'cv11', 'ss01';
     font-weight: 400;
     line-height: 1.5;
     letter-spacing: 0.005em;
@@ -86,10 +109,10 @@
   /* Glassmorphism card utility */
   .glass-card {
     background: var(--card);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(16px) saturate(120%);
+    -webkit-backdrop-filter: blur(16px) saturate(120%);
     border: 1px solid var(--border);
-    border-radius: var(--r-card);
+    border-radius: 16px;
   }
 
   /* Fey micro-interaction base */
@@ -169,10 +192,20 @@
     50%       { opacity: 0.8; transform: scale(1.08); }
   }
   @keyframes orbDrift {
-    0%   { transform: translate(0, 0); }
-    33%  { transform: translate(30px, -20px); }
-    66%  { transform: translate(-20px, 15px); }
-    100% { transform: translate(0, 0); }
+    0%   { transform: translate(0, 0) scale(1); }
+    25%  { transform: translate(35px, -25px) scale(1.05); }
+    50%  { transform: translate(-15px, 20px) scale(0.97); }
+    75%  { transform: translate(20px, 10px) scale(1.03); }
+    100% { transform: translate(0, 0) scale(1); }
+  }
+  @keyframes orbPulse2 {
+    0%, 100% { opacity: 0.45; transform: scale(1); }
+    50%       { opacity: 0.75; transform: scale(1.12); }
+  }
+  @keyframes bgFlow {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
   }
   @keyframes shimmer {
     from { background-position: -400px 0; }

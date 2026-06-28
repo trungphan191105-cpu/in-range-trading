@@ -18,7 +18,7 @@ getDb();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 
 // Static uploads
@@ -36,6 +36,13 @@ app.use('/api/spend', spendRouter);
 app.use('/api/quant', quantRouter);
 
 app.get('/api/health', (_, res) => res.json({ ok: true }));
+
+// Serve frontend in production
+if (process.env.NODE_ENV === 'production') {
+  const frontendDist = path.join(__dirname, '../../frontend/dist');
+  app.use(express.static(frontendDist));
+  app.get('*', (_req, res) => res.sendFile(path.join(frontendDist, 'index.html')));
+}
 
 app.listen(PORT, () => {
   console.log(`🚀 Backend running on http://localhost:${PORT}`);
